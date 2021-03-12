@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
+from airflow.operators.python_operator import PythonOperator
 from datetime import timedelta
 from airflow.utils.dates import days_ago
 
@@ -23,27 +24,6 @@ download_links = BashOperator(
     dag=dag,
 )
 
-# Download movies
-download_movies = BashOperator(
-    task_id='download_movies',
-    bash_command='rm -rf /tmp/movies.rar && wget https://dorotheu-apacheairflow-objects.s3.us-east-2.amazonaws.com/movies.rar -P /tmp',
-    dag=dag,
-)
-
-# Download ratings
-download_ratings = BashOperator(
-    task_id='download_ratings',
-    bash_command='rm -rf /tmp/ratings.rar && wget https://dorotheu-apacheairflow-objects.s3.us-east-2.amazonaws.com/ratings.rar -P /tmp',
-    dag=dag,
-)
-
-# Download tags
-download_tags = BashOperator(
-    task_id='download_tags',
-    bash_command='rm -rf /tmp/tags.rar && wget https://dorotheu-apacheairflow-objects.s3.us-east-2.amazonaws.com/tags.rar -P /tmp',
-    dag=dag,
-)
-
 # Unrar links
 unrar_links = BashOperator(
     task_id='unrar_links',
@@ -51,28 +31,14 @@ unrar_links = BashOperator(
     dag=dag,
 )
 
-# Unrar movies
-unrar_movies = BashOperator(
-    task_id='unrar_movies',
-    bash_command='unrar x -y /tmp/movies.rar /tmp/.',
-    dag=dag,
-)
+def data_transform_exec():
+    # Put your code here
+    pass
 
-# Unrar tags
-unrar_ratings = BashOperator(
-    task_id='unrar_ratings',
-    bash_command='unrar x -y /tmp/ratings.rar /tmp/.',
-    dag=dag,
-)
-
-# Unrar tags
-unrar_tags = BashOperator(
-    task_id='unrar_tags',
-    bash_command='unrar x -y /tmp/tags.rar /tmp/.',
-    dag=dag,
+data_transform = PythonOperator(
+    task_id="data_transform",
+    python_callable=data_transform_exec,
+    dag=dag
 )
 
 download_links   >> unrar_links
-download_movies  >> unrar_movies
-download_ratings >> unrar_ratings
-download_tags    >> unrar_tags
